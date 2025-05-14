@@ -41,8 +41,6 @@ class DenseNet_classifier:
 
 class Activation_functions:
     def apply(self, x,activation_function):
-        """Applies the specified activation function to the input tensor."""
-        # Check if the input is a PyTorch tensor
         if not isinstance(x, torch.Tensor):
             raise TypeError("Input must be a PyTorch tensor")
         if activation_function == 'relu':
