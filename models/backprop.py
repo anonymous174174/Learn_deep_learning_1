@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-#from models.layers import DenseLayer
+
 
 class Backpropagation:
     def cross_entropy_output_grad(self, predictions,targets):
@@ -11,8 +11,10 @@ class Backpropagation:
         predictions is a (batch_size, num_classes) tensor of model outputs with the softmax applied.
         dl/dal (dal is the pre-activation output) = -(targets - outputs)
         This is the gradient of the loss with respect to the pre-activation output.
+        we divide by the batch size because the loss function is averaged over the batch.
         """
-        gradient = -(targets-predictions)
+        batch_size = predictions.shape[0]
+        gradient = -(targets-predictions)/batch_size
         return gradient
     def dloss_dactivations_prev(self, weight_matrix,gradient_pre_activation):
         """
