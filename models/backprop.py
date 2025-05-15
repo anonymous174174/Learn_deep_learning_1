@@ -119,6 +119,3 @@ class Backpropagation:
             layer.bias.grad=self.dloss_dbias(gradient_loss_pre_activation_current_layer)
             if layer_number > 0:
                 gradient_loss_pre_activation_current_layer=self.dloss_dactivations_prev(layer.weight,gradient_loss_pre_activation_current_layer)*self.dactivation_dpreactivation(layer.input,activation_function_hidden_layers)
-
-            
-
