@@ -15,7 +15,6 @@ class DenseNet_classifier:
         self.loss_function = loss_function
         self.activation=Activation_functions()
         self.model=[]
-        self.predictions=None
         for i in range(model_config.__len__()-1):
             self.model.append(DenseLayer(in_features=model_config[i], out_features=model_config[i+1], dtype=self.dtype,device=self.device,weight_init=self.weight_init))
 
@@ -27,11 +26,10 @@ class DenseNet_classifier:
             x = self.activation.apply(x,self.activation_hidden_layers)
         x = self.model[-1].forward(x)
         x = self.activation.apply(x,'softmax')
-        self.predictions=x
-        #return x
+        return x
 
-    def calculate_gradients(self,targets): 
-        Backpropagation.gradients_model(self.model, self.predictions, targets,self.activation_hidden_layers)
+    def calculate_gradients(self,predictions,targets): 
+        Backpropagation().gradients_model(model=self.model, predictions=predictions, targets=targets, activation_function_hidden_layers=self.activation_hidden_layers)
 
     def predict(self, x):
         for layer_number in range(len(self.model)-1):
@@ -44,8 +42,6 @@ class DenseNet_classifier:
 
 class Activation_functions:
     def apply(self, x,activation_function):
-        if not isinstance(x, torch.Tensor):
-            raise TypeError("Input must be a PyTorch tensor")
         if activation_function == 'relu':
             return F.relu(x)
         elif activation_function == 'sigmoid':
