@@ -2,8 +2,9 @@
 from layers import DenseLayer
 import torch.nn.functional as F
 import torch
+from backprop import Backpropagation
 class DenseNet_classifier:
-    """input_config: list of numbers [input_size,hiddensize1,hiddensize2,...,output_size]"""
+    """model_config: list of numbers [input_size,hiddensize1,hiddensize2,...,output_size]"""
     def __init__(self, model_config,dtype,device,weight_init,activation_hidden_layers='relu', optimizer='adam', loss_function='cross_entropy'):
         self.model_config = model_config
         self.dtype = dtype
@@ -14,6 +15,7 @@ class DenseNet_classifier:
         self.loss_function = loss_function
         self.activation=Activation_functions()
         self.model=[]
+        self.predictions=None
         for i in range(model_config.__len__()-1):
             self.model.append(DenseLayer(in_features=model_config[i], out_features=model_config[i+1], dtype=self.dtype,device=self.device,weight_init=self.weight_init))
 
@@ -25,19 +27,20 @@ class DenseNet_classifier:
             x = self.activation.apply(x,self.activation_hidden_layers)
         x = self.model[-1].forward(x)
         x = self.activation.apply(x,'softmax')
-        return x
+        self.predictions=x
+        #return x
 
-    def backward(self, x, y):
-        # Placeholder for backward pass logic
-        pass
-
-    def train(self, x, y):
-        # Placeholder for training logic
-        pass
+    def calculate_gradients(self,targets): 
+        Backpropagation.gradients_model(self.model, self.predictions, targets,self.activation_hidden_layers)
 
     def predict(self, x):
-        # Placeholder for prediction logic
-        pass
+        for layer_number in range(len(self.model)-1):
+            x= self.model[layer_number].forward_no_grad(x)
+            x = self.activation.apply(x,self.activation_hidden_layers)
+        x = self.model[-1].forward_no_grad(x)
+        x = self.activation.apply(x,'softmax')
+        return x
+
 
 class Activation_functions:
     def apply(self, x,activation_function):

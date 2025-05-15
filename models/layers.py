@@ -19,6 +19,9 @@ class DenseLayer:
             self.input=x
         x= x@self.weight.T + self.bias
         return x
+    def forward_no_grad(self, x):
+        x= x@self.weight.T + self.bias
+        return x
     def backward(self, grad_output):
         "to implement later"
         pass
