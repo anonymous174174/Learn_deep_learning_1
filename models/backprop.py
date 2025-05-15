@@ -80,6 +80,7 @@ class Backpropagation:
         """
         Compute the derivative of the activation function with respect to the pre-activation output for hidden layers till input layer(Not for output layer).
         activation is the post-activation output of any layer.
+        we use the post-activation output of the layer because the derivative of sigmoid is sigmoid * (1 - sigmoid) for tanh it is 1 - tanh^2 and for relu it is 1 for positive activation and 0 for non-positive (defined for practical purposes as derivative for relu doesn't exist at zero).
         activation_function is the activation function used in that layer.
         dactivation/dpreactivation = f'(activation)
         where f' is the derivative of the activation function.

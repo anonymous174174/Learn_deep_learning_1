@@ -2,6 +2,7 @@ import torch
 import unittest
 import sys
 import os
+import torch.nn as nn
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from models.backprop import Backpropagation
 
@@ -30,7 +31,7 @@ class TestBackpropagation(unittest.TestCase):
 
     def test_cross_entropy_output_grad(self):
         # Expected gradient: -(targets - predictions)
-        expected = -(self.targets - self.predictions)
+        expected = -(self.targets - self.predictions)/self.batch_size
         result = self.bp.cross_entropy_output_grad(self.predictions, self.targets)
         self.assertTrue(torch.allclose(result, expected, atol=1e-6),
                         "cross_entropy_output_grad did not match expected result.")
@@ -122,7 +123,7 @@ class TestBackpropagation(unittest.TestCase):
         predictions2 = torch.softmax(predictions2, dim=1)
         # Compute cross entropy: because targets are one-hot, use negative log likelihood manually.
         log_preds = torch.log(predictions2 + 1e-9)
-        loss = -(targets * log_preds).sum(dim=0).mean()
+        loss = -(targets * log_preds).sum()/self.batch_size
         loss.backward()
         
         # Compare gradients for weight and bias.
@@ -130,6 +131,85 @@ class TestBackpropagation(unittest.TestCase):
                         "gradients_model: computed weight gradient did not match autograd result.")
         self.assertTrue(torch.allclose(layer.bias.grad, dummy_bias2.grad, atol=1e-6),
                         "gradients_model: computed bias gradient did not match autograd result.")
+        
+    def test_gradients_model_multi_layer(self):
+        # Create a 2-layer model (input_size=4, hidden_size=5, output_size=3)
+        input_size = 4
+        hidden_size = 5
+        output_size = 3
+        batch_size = 5
+        class DummyLayer:
+            def __init__(self, weight, bias):
+                self.weight = weight
+                self.bias = bias
+                self.input = None  # Previous layer's post-activation output
+                self.pre_activation = None  # Current layer's pre-activation
+
+            def forward(self, x):
+                self.input = x.detach()  # Store input (a_{l-1})
+                self.pre_activation = x @ self.weight.T + self.bias  # Store z_l
+                return self.pre_activation
+        
+        # Initialize custom model
+        W1 = torch.randn(hidden_size, input_size, requires_grad=True)
+        b1 = torch.randn(hidden_size, requires_grad=True)
+        W2 = torch.randn(output_size, hidden_size, requires_grad=True)
+        b2 = torch.randn(output_size, requires_grad=True)
+        
+        layer1 = DummyLayer(W1, b1)
+        layer2 = DummyLayer(W2, b2)
+        custom_model = [layer1, layer2]
+        
+        # Forward pass with custom model
+        x = torch.randn(batch_size, input_size)
+        z1 = layer1.forward(x)
+        a1 = torch.relu(z1)
+        z2 = layer2.forward(a1)
+        predictions = torch.softmax(z2, dim=1)
+        
+        # Create targets
+        targets = torch.zeros_like(predictions)
+        targets[torch.arange(batch_size), torch.randint(0, output_size, (batch_size,))] = 1
+        
+        # Compute custom gradients
+        bp = Backpropagation()
+        bp.gradients_model(custom_model, predictions, targets, 'relu')
+        
+        # Compute PyTorch gradients
+        torch_model = nn.Sequential(
+            nn.Linear(input_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, output_size)
+        )
+        with torch.no_grad():
+            torch_model[0].weight.copy_(W1)
+            torch_model[0].bias.copy_(b1)
+            torch_model[2].weight.copy_(W2)
+            torch_model[2].bias.copy_(b2)
+        
+        torch_pred = torch_model(x)
+        loss = nn.CrossEntropyLoss()(torch_pred, targets.argmax(dim=1))
+        loss.backward()
+        
+        # Compare gradients
+        self.assertTrue(torch.allclose(custom_model[0].weight.grad, torch_model[0].weight.grad, atol=1e-6),
+                        "Input layer weight gradients mismatch")
+        self.assertTrue(torch.allclose(custom_model[0].bias.grad, torch_model[0].bias.grad, atol=1e-6),
+                        "Input layer bias gradients mismatch")
+        self.assertTrue(torch.allclose(custom_model[1].weight.grad, torch_model[2].weight.grad, atol=1e-6),
+                        "Output layer weight gradients mismatch")
+        self.assertTrue(torch.allclose(custom_model[1].bias.grad, torch_model[2].bias.grad, atol=1e-6),
+                        "Output layer bias gradients mismatch")
+        print("Custom gradients:")
+        print("Input layer weight grad:", custom_model[0].weight.grad)
+        print("Input layer bias grad:", custom_model[0].bias.grad)
+        print("Output layer weight grad:", custom_model[1].weight.grad)
+        print("Output layer bias grad:", custom_model[1].bias.grad)
+        print("PyTorch gradients:")
+        print("Input layer weight grad:", torch_model[0].weight.grad)
+        print("Input layer bias grad:", torch_model[0].bias.grad)
+        print("Output layer weight grad:", torch_model[2].weight.grad)
+        print("Output layer bias grad:", torch_model[2].bias.grad)
 
 if __name__ == '__main__':
     unittest.main()
