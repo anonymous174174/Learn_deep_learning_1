@@ -6,11 +6,6 @@ class CrossEntropyLoss:
         self.device = device
 
     def forward(self, predictions, targets):
-        # Ensure predictions are in the range (0, 1)
-        """" torch.clamp basically limits the values in the tensor to be within the specified range.
-        """
-
-        #predictions = torch.clamp(predictions, min=1e-7, max=1 - 1e-7)
         mean_batch_loss = -torch.sum(targets * torch.log(predictions), dim=1).mean()
         return mean_batch_loss
 
@@ -20,9 +15,5 @@ class MeanSquaredError:
         self.device = device
 
     def forward(self, predictions, targets):
-        # Ensure predictions are in the range (0, 1)
-        """" torch.clamp basically limits the values in the tensor to be within the specified range.
-        """
-        #predictions = torch.clamp(predictions, min=1e-7, max=1 - 1e-7)
         mean_batch_loss = torch.mean(torch.square(predictions - targets))
         return mean_batch_loss

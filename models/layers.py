@@ -9,8 +9,8 @@ class DenseLayer:
         self.dtype = dtype
         self.device = device
         self.weight_init = weight_init
-        self.weight = torch.zeros((out_features, in_features), dtype=dtype,device=device)#,requires_grad=requires_grad)
-        self.bias = torch.zeros((out_features,), dtype=dtype,device=device)#,requires_grad=requires_grad)
+        self.weight = torch.zeros((out_features, in_features), dtype=dtype,device=device)
+        self.bias = torch.zeros((out_features,), dtype=dtype,device=device)
         nn.init.xavier_uniform_(self.weight) if weight_init == 'xavier' else nn.init.uniform_(self.weight)
         self.requires_grad = requires_grad
 

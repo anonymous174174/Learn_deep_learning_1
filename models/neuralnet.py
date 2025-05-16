@@ -50,7 +50,7 @@ class Activation_functions:
             return torch.tanh(x)
         elif activation_function == 'softmax':
             return F.softmax(x, dim=1)
-        elif activation_function == 'identity':
-            return x
+        # elif activation_function == 'identity':
+        #     return x
         else:
             raise ValueError("Unsupported activation function")
