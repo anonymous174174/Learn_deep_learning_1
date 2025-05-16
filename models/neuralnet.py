@@ -1,11 +1,11 @@
 # neuralnet.py
-from layers import DenseLayer
+from models.model_layers import DenseLayer
 import torch.nn.functional as F
 import torch
-from backprop import Backpropagation
+from models.backprop import Backpropagation
 class DenseNet_classifier:
     """model_config: list of numbers [input_size,hiddensize1,hiddensize2,...,output_size]"""
-    def __init__(self, model_config,dtype,device,weight_init,activation_hidden_layers='relu',  loss_function='cross_entropy'):
+    def __init__(self, model_config,dtype,device,weight_init,activation_hidden_layers='relu', loss_function='cross_entropy'):
         self.model_config = model_config
         self.dtype = dtype
         self.device = device
