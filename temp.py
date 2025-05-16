@@ -8,11 +8,13 @@ from loss.loss_functions import CrossEntropyLoss
 from optim.optimizers_weight_decay import SGD, Adam, RMSprop, Nadam, Nesterov, Nadam
 import torch
 from data.dataloader import MNISTDataLoader
-dataset=MNISTDataLoader(dataset="fashion_mnist",dtype=torch.float32,batch_size=32,device="cpu",normalize=True)
+from torch.cuda import device_of
+device = "mps" if torch.backends.mps.is_available() else  "cuda" if torch.cuda.is_available() else "cpu"
+dataset=MNISTDataLoader(dataset="fashion_mnist",dtype=torch.float32,batch_size=32,device=device,normalize=True)
 
-model=DenseNet_classifier(model_config=[784,128,128,128,128,10],dtype=torch.float32,device="cpu",weight_init="xavier",activation_hidden_layers="relu",  loss_function="cross_entropy")
+model=DenseNet_classifier(model_config=[784,128,128,128,128,10],dtype=torch.float32,device=device,weight_init="xavier",activation_hidden_layers="relu",  loss_function="cross_entropy")
 opt=Nadam(layers=model.model,lr=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.0000)
-lf=CrossEntropyLoss(dtype=torch.float32,device="cpu")
+lf=CrossEntropyLoss(dtype=torch.float32,device=device)
 def compute_accuracy(predictions, targets):
     """
     Computes the accuracy of predictions given one-hot encoded targets.
@@ -45,12 +47,12 @@ for epoch in range(1,11):
         #print(f"Epoch {epoch}/5 | Batch {batch_idx+1}", end='\r')
     print("Training Accuracy for epoch",epoch,"is",accuracy/(batch_idx+1))
     accuracy=0
-    for img, targets in dataset.get_test_batches():
+    for batch_idx1, (img, targets) in enumerate(dataset.get_test_batches()):
         predictions=model.predict(img)
         ab=compute_accuracy(predictions, targets)
         accuracy+=ab
     
-    print("Validation Accuracy for epoch",epoch,"is",accuracy/(batch_idx+1))
+    print("Validation Accuracy for epoch",epoch,"is",accuracy/(batch_idx1+1))
     accuracy=0
     print("-------------------------------------------------------------")
     # every_epoch_loss.append(loss_store)
