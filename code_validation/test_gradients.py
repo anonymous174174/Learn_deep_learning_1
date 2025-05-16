@@ -211,5 +211,6 @@ class TestBackpropagation(unittest.TestCase):
         print("Output layer weight grad:", torch_model[2].weight.grad)
         print("Output layer bias grad:", torch_model[2].bias.grad)
 
+
 if __name__ == '__main__':
     unittest.main()
