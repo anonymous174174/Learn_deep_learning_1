@@ -29,7 +29,7 @@ class DenseNet_classifier:
         return x
 
     def calculate_gradients(self,predictions,targets): 
-        Backpropagation().gradients_model(model=self.model, predictions=predictions, targets=targets, activation_function_hidden_layers=self.activation_hidden_layers)
+        Backpropagation().gradients_model(model=self.model, predictions=predictions, targets=targets, activation_function_hidden_layers=self.activation_hidden_layers,loss_function=self.loss_function)
 
     def predict(self, x):
         for layer_number in range(len(self.model)-1):
