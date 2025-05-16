@@ -49,7 +49,10 @@ class MNISTDataLoader:
             end = start + self.batch_size
             batch_indices = indices[start:end]
             yield self.x_train[batch_indices], self.y_train[batch_indices]
-
+    def get_batch(self):
+        batch_indices = torch.randint(0, self.train_size, (self.batch_size,))
+        batch = self.x_train[batch_indices], self.y_train[batch_indices]
+        return batch
     def get_test_batches(self):
         for start in range(0, self.test_size, self.batch_size):
             end = start + self.batch_size
