@@ -3,9 +3,9 @@ import numpy as np
 import torch
 
 class MNISTDataLoader:
-    def __init__(self, dataset="fashion", dtype=torch.float32, batch_size=32, device="cpu", normalize=True):
+    def __init__(self, dataset="fashion_mnist", dtype=torch.float32, batch_size=32, device="cpu", normalize=True):
         """
-        dataset: "mnist" or "fashion"
+        dataset: "mnist" or "fashion_mnist"
         dtype: torch dtype for tensors
         batch_size: mini-batch size
         device: "cpu" or "cuda"
@@ -15,12 +15,12 @@ class MNISTDataLoader:
         self.device = device
         self.normalize = normalize
 
-        if dataset == "fashion":
+        if dataset == "fashion_mnist":
             (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
         elif dataset == "mnist":
             (x_train, y_train), (x_test, y_test) = mnist.load_data()
         else:
-            raise ValueError("Dataset must be 'mnist' or 'fashion'")
+            raise ValueError("Dataset must be 'mnist' or 'fashion_mnist'")
 
         # Flatten and convert to float
         x_train = x_train.reshape((x_train.shape[0], -1)).astype("float32")
