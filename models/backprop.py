@@ -4,6 +4,21 @@ import torch.nn.functional as F
 
 
 class Backpropagation:
+    def mean_squared_output_grad(self, predictions, targets):
+        """
+        Compute the partial derivative of the loss with respect to the output pre-activation for mean squared error loss function.
+        targets is a (batch_size, num_classes) tensor of one-hot encoded labels.
+        predictions is a (batch_size, num_classes) tensor of model outputs with the softmax applied.
+        dl/dal (dal is the pre-activation output) = ∂ak​∂L​=2y^​k​[(y^​k​−yk​)−i∑​(y^​i​−yi​)y^​i​]
+        This is the gradient of the loss with respect to the pre-activation output.
+        we divide by the batch size because the loss function is averaged over the batch.
+        """
+        delta = predictions - targets
+        dot = (predictions * delta).sum(dim=1, keepdim=True)
+        gradient = 2 * predictions * (delta - dot)
+        batch_size = predictions.shape[0]
+        gradient /= batch_size
+        return gradient
     def cross_entropy_output_grad(self, predictions,targets):
         """
         Compute the partial derivative of the loss with respect to the output pre-activation for cross entropy loss function.
@@ -96,7 +111,7 @@ class Backpropagation:
         else:
             raise ValueError('Unknown activation function')
     
-    def gradients_model(self, model, predictions,targets,activation_function_hidden_layers):
+    def gradients_model(self, model, predictions,targets,activation_function_hidden_layers,loss_function="cross_entropy"):
 
         """
         NOTE PASS obj.model of the DenseNet_classifier class as model parameter to this function.
@@ -110,7 +125,13 @@ class Backpropagation:
         """
         
         #gradient_outer_pre_activation_with_respect_to_loss = self.cross_entropy_output_grad(predictions, targets)
-        gradient_loss_pre_activation_current_layer =self.cross_entropy_output_grad(predictions, targets) #self.dloss_dactivations_prev(model[-1].weight, gradient_outer_pre_activation_with_respect_to_loss)
+        if loss_function == "mean_squared_error":
+            gradient_loss_pre_activation_current_layer = self.mean_squared_output_grad(predictions, targets)
+        elif loss_function == "cross_entropy":
+            gradient_loss_pre_activation_current_layer = self.cross_entropy_output_grad(predictions, targets)
+        else:
+            raise ValueError('Unknown loss function')
+        # gradient_loss_pre_activation_current_layer =self.cross_entropy_output_grad(predictions, targets) #self.dloss_dactivations_prev(model[-1].weight, gradient_outer_pre_activation_with_respect_to_loss)
         for layer_number in range(model.__len__()-1,-1,-1):
             layer = model[layer_number]
             layer.weight.grad = None
