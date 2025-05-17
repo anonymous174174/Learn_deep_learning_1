@@ -73,30 +73,23 @@ def train(config=None):
             loss_fn = MeanSquaredError(dtype=dtype, device=device)
         
         # Optimizer
-        optimizer_class = {
-            'sgd': SGD,
-            'momentum': Momentum,
-            'nag': Nesterov,
-            'rmsprop': RMSprop,
-            'adam': Adam,
-            'nadam': Nadam
-        }[config.optimizer]
-        
-        optimizer = optimizer_class(
-            model,
-            learning_rate=config.learning_rate,
-            momentum=config.momentum,
-            beta=config.beta,
-            beta1=config.beta1,
-            beta2=config.beta2,
-            epsilon=config.epsilon,
-            weight_decay=config.weight_decay
-        )
+        optimizer_configs = {
+        'sgd': {'class': SGD, 'kwargs': {'weight_decay': config.weight_decay}},
+        'momentum': {'class': Momentum, 'kwargs': {'momentum': config.momentum, 'weight_decay': config.weight_decay}},
+        'nag': {'class': Nesterov, 'kwargs': {'momentum': config.momentum, 'weight_decay': config.weight_decay}},
+        'rmsprop': {'class': RMSprop, 'kwargs': {'beta': config.beta, 'epsilon': config.epsilon, 'weight_decay': config.weight_decay}},
+        'adam': {'class': Adam, 'kwargs': {'beta1': config.beta1, 'beta2': config.beta2, 'epsilon': config.epsilon, 'weight_decay': config.weight_decay}},
+        'nadam': {'class': Nadam, 'kwargs': {'beta1': config.beta1, 'beta2': config.beta2, 'epsilon': config.epsilon, 'weight_decay': config.weight_decay}}
+                            }
+
+        optimizer_class = optimizer_configs[config.optimizer]['class']
+        optimizer_kwargs = optimizer_configs[config.optimizer]['kwargs']
+
+        optimizer = optimizer_class(layers=model.model, lr=config.learning_rate, **optimizer_kwargs)
         
         # Training loop
         for epoch in range(1, config.epochs + 1):
             # Training phase
-            model.train()
             train_loss = 0.0
             correct = 0
             total = 0
@@ -112,10 +105,11 @@ def train(config=None):
                 
                 # Calculate metrics
                 train_loss += loss.item()
-                _, predicted = torch.max(predictions.data, 1)
+                pred_labels = torch.argmax(predictions,dim=1)
+                true_labels = torch.argmax(predictions,dim=1)
                 total += targets.size(0)
-                correct += (predicted == targets).sum().item()
-            
+                correct += (pred_labels == true_labels).sum().item()
+
             # Validation phase
             # model.eval()
             val_loss = 0.0
@@ -128,9 +122,10 @@ def train(config=None):
                     loss = loss_fn.forward(predictions, targets)
                     
                     val_loss += loss.item()
-                    _, predicted = torch.max(predictions.data, 1)
+                    pred_labels = torch.argmax(predictions,dim=1)
+                    true_labels = torch.argmax(predictions,dim=1)
                     val_total += targets.size(0)
-                    val_correct += (predicted == targets).sum().item()
+                    val_correct += (pred_labels == true_labels).sum().item()
             
             # Calculate epoch metrics
             train_acc = 100 * correct / total

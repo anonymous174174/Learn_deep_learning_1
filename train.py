@@ -61,7 +61,7 @@ def main():
         activation_hidden_layers=args.activation,
         loss_function=args.loss
     )
-    print(f"Model architecture:\n{model}\n")
+    print(f"Model architecture:\n input layer: 784 neurons\n hidden dense layers: {model_config[1:-1]}\n output layer: 10 neurons\n")
 
     # Loss function
     if args.loss == 'cross_entropy':
@@ -70,25 +70,20 @@ def main():
         loss_fn = MeanSquaredError(dtype=dtype, device=device)
 
     # Optimizer
-    optimizer_class = {
-        'sgd': SGD,
-        'momentum': Momentum,
-        'nag': Nesterov,
-        'rmsprop': RMSprop,
-        'adam': Adam,
-        'nadam': Nadam
-    }[args.optimizer]
-    
-    optimizer = optimizer_class(
-        model,
-        learning_rate=args.learning_rate,
-        momentum=args.momentum,
-        beta=args.beta,
-        beta1=args.beta1,
-        beta2=args.beta2,
-        epsilon=args.epsilon,
-        weight_decay=args.weight_decay
-    )
+    optimizer_configs = {
+    'sgd': {'class': SGD, 'kwargs': {'weight_decay': args.weight_decay}},
+    'momentum': {'class': Momentum, 'kwargs': {'momentum': args.momentum, 'weight_decay': args.weight_decay}},
+    'nag': {'class': Nesterov, 'kwargs': {'momentum': args.momentum, 'weight_decay': args.weight_decay}},
+    'rmsprop': {'class': RMSprop, 'kwargs': {'beta': args.beta, 'epsilon': args.epsilon, 'weight_decay': args.weight_decay}},
+    'adam': {'class': Adam, 'kwargs': {'beta1': args.beta1, 'beta2': args.beta2, 'epsilon': args.epsilon, 'weight_decay': args.weight_decay}},
+    'nadam': {'class': Nadam, 'kwargs': {'beta1': args.beta1, 'beta2': args.beta2, 'epsilon': args.epsilon, 'weight_decay': args.weight_decay}}
+                        }
+
+    optimizer_class = optimizer_configs[args.optimizer]['class']
+    optimizer_kwargs = optimizer_configs[args.optimizer]['kwargs']
+
+    optimizer = optimizer_class(layers=model.model, lr=args.learning_rate, **optimizer_kwargs)
+
     print(f"Training configuration:")
     print(f"- Dataset: {args.dataset}")
     print(f"- Epochs: {args.epochs}")
@@ -100,7 +95,7 @@ def main():
     # Training loop
     for epoch in range(1, args.epochs + 1):
         epoch_start = time.time()
-        model.train()
+        # model.train()
         train_loss = 0.0
         correct = 0
         total = 0
@@ -117,9 +112,10 @@ def main():
 
             # Calculate metrics
             train_loss += loss.item()
-            _, predicted = torch.max(predictions.data, 1)
+            pred_labels = torch.argmax(predictions,dim=1)
+            true_labels = torch.argmax(predictions,dim=1)
             total += targets.size(0)
-            correct += (predicted == targets).sum().item()
+            correct += (pred_labels == true_labels).sum().item()
 
             # Print progress
             if batch_idx % 100 == 0:
@@ -138,9 +134,10 @@ def main():
                 loss = loss_fn.forward(predictions, targets)
                 
                 val_loss += loss.item()
-                _, predicted = torch.max(predictions.data, 1)
+                pred_labels = torch.argmax(predictions,dim=1)
+                true_labels = torch.argmax(predictions,dim=1)
                 val_total += targets.size(0)
-                val_correct += (predicted == targets).sum().item()
+                val_correct += (pred_labels == true_labels).sum().item()
 
         # Calculate metrics
         train_acc = 100 * correct / total
