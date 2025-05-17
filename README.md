@@ -9,7 +9,6 @@ This project implements a simple deep neural network classifier built from scrat
 - **loss/**: Contains custom loss functions (Cross Entropy and Mean Squared Error).
 - **optim/**: Contains various optimizers with weight decay (SGD, Momentum, Nesterov, RMSProp, Adam, Nadam).
 - **train.py**: Main training script to run the model.
-- **README.md**: This file.
 
 ## Prerequisites
 
