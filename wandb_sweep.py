@@ -165,11 +165,21 @@ if __name__ == "__main__":
                 'values': [32, 64, 128]
             },
             'optimizer': {
-                'values': ['adam', 'nadam', 'rmsprop']
+                'values': ['sgd', 'momentum', 'nag','adam', 'nadam', 'rmsprop']
             },
             'weight_decay': {
                 'min': 0,
                 'max': 1e-3
+            },
+            'activation': {
+                'values': ['relu', 'tanh', 'sigmoid']
+            },
+            'epochs': {
+                'min': 1,
+                'max': 10
+            },
+            'loss':{
+                'values': ['cross_entropy', 'mean_squared_error']
             }
         }
     }
