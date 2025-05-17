@@ -72,8 +72,8 @@ def main():
     # Optimizer
     optimizer_configs = {
     'sgd': {'class': SGD, 'kwargs': {'weight_decay': args.weight_decay}},
-    'momentum': {'class': Momentum, 'kwargs': {'momentum': args.momentum, 'weight_decay': args.weight_decay}},
-    'nag': {'class': Nesterov, 'kwargs': {'momentum': args.momentum, 'weight_decay': args.weight_decay}},
+    'momentum': {'class': Momentum, 'kwargs': {'beta': args.momentum, 'weight_decay': args.weight_decay}},
+    'nag': {'class': Nesterov, 'kwargs': {'beta': args.momentum, 'weight_decay': args.weight_decay}},
     'rmsprop': {'class': RMSprop, 'kwargs': {'beta': args.beta, 'epsilon': args.epsilon, 'weight_decay': args.weight_decay}},
     'adam': {'class': Adam, 'kwargs': {'beta1': args.beta1, 'beta2': args.beta2, 'epsilon': args.epsilon, 'weight_decay': args.weight_decay}},
     'nadam': {'class': Nadam, 'kwargs': {'beta1': args.beta1, 'beta2': args.beta2, 'epsilon': args.epsilon, 'weight_decay': args.weight_decay}}

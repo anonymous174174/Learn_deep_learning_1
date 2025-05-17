@@ -75,8 +75,8 @@ def train(config=None):
         # Optimizer
         optimizer_configs = {
         'sgd': {'class': SGD, 'kwargs': {'weight_decay': config.weight_decay}},
-        'momentum': {'class': Momentum, 'kwargs': {'momentum': config.momentum, 'weight_decay': config.weight_decay}},
-        'nag': {'class': Nesterov, 'kwargs': {'momentum': config.momentum, 'weight_decay': config.weight_decay}},
+        'momentum': {'class': Momentum, 'kwargs': {'beta': config.momentum, 'weight_decay': config.weight_decay}},
+        'nag': {'class': Nesterov, 'kwargs': {'beta': config.momentum, 'weight_decay': config.weight_decay}},
         'rmsprop': {'class': RMSprop, 'kwargs': {'beta': config.beta, 'epsilon': config.epsilon, 'weight_decay': config.weight_decay}},
         'adam': {'class': Adam, 'kwargs': {'beta1': config.beta1, 'beta2': config.beta2, 'epsilon': config.epsilon, 'weight_decay': config.weight_decay}},
         'nadam': {'class': Nadam, 'kwargs': {'beta1': config.beta1, 'beta2': config.beta2, 'epsilon': config.epsilon, 'weight_decay': config.weight_decay}}
