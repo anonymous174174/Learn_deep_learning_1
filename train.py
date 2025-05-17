@@ -119,7 +119,7 @@ def main():
 
             # Print progress
             if batch_idx % 100 == 0:
-                print(f"Epoch {epoch} | Batch {batch_idx}/{dataset.train_size//(batch_idx+1)} | "
+                print(f"Epoch {epoch} | Batch {batch_idx}/{int(dataset.train_size/args.batch_size)} | "
                       f"Loss: {loss.item():.4f}", end='\r')
 
         # Validation phase
