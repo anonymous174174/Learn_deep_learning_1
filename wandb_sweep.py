@@ -3,7 +3,6 @@ from models.neuralnet import DenseNet_classifier
 from optim.optimizers_weight_decay import SGD, Momentum, Nesterov, RMSprop, Adam, Nadam
 from loss.loss_functions import CrossEntropyLoss, MeanSquaredError
 from data.dataloader import MNISTDataLoader
-from utils.metrics import compute_accuracy
 import torch
 import wandb
 
