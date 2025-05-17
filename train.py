@@ -5,7 +5,7 @@ from loss.loss_functions import CrossEntropyLoss, MeanSquaredError
 from data.dataloader import MNISTDataLoader
 from utils.metrics import compute_accuracy
 import torch
-# import wandb
+import wandb
 def get_args():
     parser = argparse.ArgumentParser(description="Train a neural network with configurable options.")
 
@@ -34,12 +34,12 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    # wandb.init(
-    #     project=args.wandb_project,
-    #     entity=args.wandb_entity,
-    #     config=vars(args),
-    #     name=f"{args.optimizer}_bs{args.batch_size}_lr{args.learning_rate}_act_{args.activation}_nhl{args.num_layers}"
-    # )
+    wandb.init(
+        project=args.wandb_project,
+        entity=args.wandb_entity,
+        config=vars(args),
+        name=f"{args.optimizer}_bs{args.batch_size}_lr{args.learning_rate}_act_{args.activation}_nhl{args.num_layers}"
+    )
 
     # Load data
     dtype= torch.float32
@@ -74,8 +74,20 @@ if __name__ == "__main__":
         raise ValueError("Unsupported optimizer")
     
 
-    train_loader, val_loader, input_size, num_classes = load_dataset(args.dataset, args.batch_size)
+    for epochs in range(1,args.epochs+1):
+        print(f"Epoch {epochs}/{args.epochs}")
+        for batch_idx, (imgs, targets) in enumerate(dataset.get_train_batches(shuffle=True)):
+            predictions=model.forward(imgs)
+            loss_batch=loss_function.forward(predictions=predictions, targets=targets)
+            model.calculate_gradients(predictions=predictions, targets=targets)
+            optimizer.step()
+            if batch_idx % 100 == 0:
+                print(f"Batch {batch_idx}/{dataset.train_size//args.batch_size} | Loss: {loss_batch.item():.4f}", end='\r')
+        for batch_idx , (imgs, targets) in enumerate(dataset.get_test_batches()):
+            predictions=model.predict(imgs)
+            loss_batch=loss_function.forward(predictions=predictions, targets=targets)
+            if batch_idx % 100 == 0:
+                print(f"Batch {batch_idx}/{dataset.test_size//args.batch_size} | Loss: {loss_batch.item():.4f}", end='\r')
+            
 
-    
     print(args)
-    # ...existing code...

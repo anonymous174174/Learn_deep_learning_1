@@ -17,8 +17,32 @@ class MNISTDataLoader:
 
         if dataset == "fashion_mnist":
             (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+            self.labels = [
+                            "T-shirt/top",    # 0
+                            "Trouser",        # 1
+                            "Pullover",       # 2
+                            "Dress",          # 3
+                            "Coat",           # 4
+                            "Sandal",         # 5
+                            "Shirt",          # 6
+                            "Sneaker",        # 7
+                            "Bag",            # 8
+                            "Ankle boot"      # 9
+                        ]
         elif dataset == "mnist":
             (x_train, y_train), (x_test, y_test) = mnist.load_data()
+            self.labels = [
+                        "Zero",      # 0
+                        "One",       # 1
+                        "Two",       # 2
+                        "Three",     # 3
+                        "Four",      # 4
+                        "Five",      # 5
+                        "Six",       # 6
+                        "Seven",     # 7
+                        "Eight",     # 8
+                        "Nine"       # 9
+                    ]
         else:
             raise ValueError("Dataset must be 'mnist' or 'fashion_mnist'")
 
