@@ -106,7 +106,7 @@ def train(config=None):
                 # Calculate metrics
                 train_loss += loss.item()
                 pred_labels = torch.argmax(predictions,dim=1)
-                true_labels = torch.argmax(predictions,dim=1)
+                true_labels = torch.argmax(targets,dim=1)
                 total += targets.size(0)
                 correct += (pred_labels == true_labels).sum().item()
 
@@ -123,15 +123,15 @@ def train(config=None):
                     
                     val_loss += loss.item()
                     pred_labels = torch.argmax(predictions,dim=1)
-                    true_labels = torch.argmax(predictions,dim=1)
+                    true_labels = torch.argmax(targets,dim=1)
                     val_total += targets.size(0)
                     val_correct += (pred_labels == true_labels).sum().item()
             
             # Calculate epoch metrics
             train_acc = 100 * correct / total
             val_acc = 100 * val_correct / val_total
-            avg_train_loss = train_loss / len(dataset.train_loader)
-            avg_val_loss = val_loss / len(dataset.test_loader)
+            avg_train_loss = train_loss / dataset.train_size
+            avg_val_loss = val_loss / dataset.test_size
             
             # Log metrics to wandb
             wandb.log({
