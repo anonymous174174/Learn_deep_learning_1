@@ -175,3 +175,7 @@ cython_debug/
 # temp.py
 .github/
 .vscode/
+old_train.py
+.utils/
+setup.ipynb
+temp.py
