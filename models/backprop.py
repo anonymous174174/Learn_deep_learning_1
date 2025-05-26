@@ -8,6 +8,12 @@ class Backpropagation:
         """
         Compute the partial derivative of the loss with respect to the output pre-activation for mean squared error loss function.
         targets is a (batch_size, num_classes) tensor of one-hot encoded labels.
+        
+        NOTE: Using Mean Squared Error with a Softmax output is known to suffer from vanishing gradients
+        due to the derivative of the softmax function. This implementation is for experimental purposes
+        to observe this effect. For classification tasks, CrossEntropyLoss is generally preferred
+        and mathematically more appropriate.
+        
         predictions is a (batch_size, num_classes) tensor of model outputs with the softmax applied.
         dl/dal (dal is the pre-activation output) = ∂ak​∂L​=2y^​k​[(y^​k​−yk​)−i∑​(y^​i​−yi​)y^​i​]
         This is the gradient of the loss with respect to the pre-activation output.
